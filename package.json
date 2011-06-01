@@ -1,0 +1,14 @@
+{
+	"name": "underscore.inspector",
+	"version": "0.1",
+	"main": "./underscore.inspector"
+	"description": "A javascript object/value inspector mixin for underscore.js",
+	"keywords": ["underscore", "underscore.string", "utility", "debugging"],
+	"homepage": "https://github.com/mark-hahn/underscore.inspector",
+	"repository" :  { 
+		"type" : "git", 
+		"url" : "git@github.com:mark-hahn/underscore.inspector.git"
+	}, 
+	{ "dependencies" : { "underscore" : ">=1.0" }
+ }
+

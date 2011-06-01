@@ -1,0 +1,51 @@
+
+###
+coffee -cb /opt/node/bb/dev/node_modules/underscore.inspector/underscore.inspector.cof
+###
+
+_ = require 'underscore'
+
+exports.xTypeof = xTypeof = (v) ->
+	if _.isUndefined	v then return "undefined"
+	if _.isNull			v then return "null"
+	if _.isBoolean 		v then return "boolean"
+	if _.isNumber 		v then return "number"
+	if _.isNaN 			v then return "nan"
+	if _.isString 		v then return "string"
+	if _.isArray 		v then return "array"
+	if _.isFunction		v then return "function"
+	if _.isRegExp 		v then return "regexp"
+	if _.isArguments	v then return "arguments"
+	if typeof v == 'object' then return 'object'
+	return 'unknown'
+
+exports.firstType = (list, type) ->
+	for item in list then if xTypeof(item) == type then return item
+	null
+
+inspectRecurse = (objList, arg, depth, key = '') ->
+	str = ''; for i in [0...depth] then str += '   '
+	if objList.length > 100 then return str + '... (Exceeded 100 object limit)\n'
+	toa = xTypeof arg
+	str += key + '<' + toa
+	switch toa
+		when "array", "arguments", "object"
+			objListIdx = _.indexOf(objList, arg)
+			idx = (if objListIdx != -1 then objListIdx else objList.length)
+			str += ':' + idx + ':' + (if toa == "object" then  _.size(arg) else arg.length) + '>'
+			if objListIdx != -1 then (return str + ' *duplicate*\n') else str += '\n'
+			objList.push arg
+			recurse = (k,v) -> str += inspectRecurse objList, v, depth + 1, k + ': '
+			if toa == "object" then for own k,v of arg then recurse k,v
+			else 					for     v,i in arg then recurse i,v
+			str
+		when "function" 
+			hdr = str + '>'
+			hdr + arg.toString().replace(/\s+/g, ' ')[8..100-hdr.length] + '\n'
+		when "null", "undefined", "nan" then str + '>\n'
+		else str + '> ' + arg.toString() + '\n'
+
+exports.inspect = (arg, depth = 0) ->
+	objList = []
+	inspectRecurse(objList, arg, depth)[0..-2]
+
