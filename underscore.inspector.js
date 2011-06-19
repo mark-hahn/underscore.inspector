@@ -1,17 +1,20 @@
 /*
-coffee -cb /opt/node/bb/dev/node_modules/underscore.inspect/underscore.inspect.cof
-*/var inspectRecurse, xTypeof, _;
-var __hasProp = Object.prototype.hasOwnProperty;
+coffee -cb /opt/node/bb/dev/node_modules/underscore.inspector/underscore.inspector.cof
+*/var atbar, dump, fs, inspect, inspectRecurse, x, xTypeof, _;
+var __hasProp = Object.prototype.hasOwnProperty, __slice = Array.prototype.slice;
 _ = require('underscore');
-exports.firstType = function(list, type) {
-  var item, _i, _len;
-  for (_i = 0, _len = list.length; _i < _len; _i++) {
-    item = list[_i];
-    if (typeof item === type) {
-      return item;
+_.mixin(require('underscore.string'));
+x = 1;
+exports.wait = function(cb) {
+  var recurse;
+  console.log('Node execution is frozen waiting on debugger (in underscore.inspector)');
+  return (recurse = function() {
+    if (x = 1) {
+      return setTimeout(recurse, 200);
+    } else {
+      return cb();
     }
-  }
-  return null;
+  })();
 };
 exports.xTypeof = xTypeof = function(v) {
   if (_.isUndefined(v)) {
@@ -48,6 +51,16 @@ exports.xTypeof = xTypeof = function(v) {
     return 'object';
   }
   return 'unknown';
+};
+exports.firstType = function(list, type) {
+  var item, _i, _len;
+  for (_i = 0, _len = list.length; _i < _len; _i++) {
+    item = list[_i];
+    if (xTypeof(item) === type) {
+      return item;
+    }
+  }
+  return null;
 };
 inspectRecurse = function(objList, arg, depth, key) {
   var hdr, i, idx, k, objListIdx, recurse, str, toa, v, _len;
@@ -103,11 +116,49 @@ inspectRecurse = function(objList, arg, depth, key) {
       return str + '> ' + arg.toString() + '\n';
   }
 };
-exports.inspect = function(arg, depth) {
+exports.inspect = inspect = function(arg, depth) {
   var objList;
   if (depth == null) {
     depth = 0;
   }
   objList = [];
   return inspectRecurse(objList, arg, depth).slice(0, -1);
+};
+exports.dump = dump = function(arg, depth) {
+  return console.log(inspect(arg, depth));
+};
+exports.dbg = function() {
+  var arg, args, _i, _len, _results;
+  args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+  if (typeof args[0] === 'string') {
+    console.log('-- DBG: ' + args.shift());
+  }
+  _results = [];
+  for (_i = 0, _len = args.length; _i < _len; _i++) {
+    arg = args[_i];
+    _results.push(dump(arg, 1));
+  }
+  return _results;
+};
+fs = require('fs');
+atbar = require('atbar');
+exports.log = function(path, msg) {
+  return atbar.run('trace', function() {
+    var fd;
+    fd = null;
+    msg = ('' + new Date).slice(0, 24) + '  ' + msg + '\n';
+    this._(function() {
+      '_.log';      return fs.open(path, 'a', this.$());
+    });
+    this._(function(_throw, d) {
+      fd = d;
+      return fs.write(fd, msg, null, null, this.$());
+    });
+    this._(function(_throw) {
+      return fs.close(fd);
+    });
+    return this._('catch', function(err) {
+      return console.log('underscore.inspector.log err: ' + err);
+    });
+  });
 };

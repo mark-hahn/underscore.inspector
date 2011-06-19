@@ -1,6 +1,6 @@
 {
 	"name": "underscore.inspector",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"main": "./underscore.inspector",
 	"description": "A javascript object/value inspector mixin for underscore.js",
 	"keywords": ["underscore", "underscore.string", "utility", "debugging"],

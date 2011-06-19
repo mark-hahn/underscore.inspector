@@ -4,6 +4,18 @@ coffee -cb /opt/node/bb/dev/node_modules/underscore.inspector/underscore.inspect
 ###
 
 _ = require 'underscore'
+_.mixin require 'underscore.string'
+
+# wait for debugger
+# node-inspector &
+# coffee --nodejs --debug /opt/...
+# http://bb.btq.in:8080/debug?port=5858
+# rdd  ->  start dev with debugger
+x=1
+exports.wait = (cb) -> 
+	console.log 'Node execution is frozen waiting on debugger (in underscore.inspector)' 
+	do recurse = -> if x=1 then setTimeout recurse, 200 else cb()
+	
 
 exports.xTypeof = xTypeof = (v) ->
 	if _.isUndefined	v then return "undefined"
@@ -45,7 +57,38 @@ inspectRecurse = (objList, arg, depth, key = '') ->
 		when "null", "undefined", "nan" then str + '>\n'
 		else str + '> ' + arg.toString() + '\n'
 
-exports.inspect = (arg, depth = 0) ->
+exports.inspect = inspect = (arg, depth = 0) ->
 	objList = []
 	inspectRecurse(objList, arg, depth)[0..-2]
+
+exports.dump = dump = (arg, depth) -> console.log inspect arg, depth
+	
+exports.dbg = (args...) ->
+	if typeof args[0] == 'string'
+		console.log '-- DBG: ' + args.shift()
+	for arg in args
+		dump arg, 1
+
+exports.l = (s) ->
+	res = "console.log();"
+	[lbl, s] = s.split ':'
+	if s
+		res += "console.log('------ #{lbl} ------');"
+	else
+		s = lbl
+	vars = s.split ','
+	for v in vars
+		res += "console.log('#{v}: ' + _.inspect(#{v}));"
+	res
+		
+fs = require 'fs'
+atbar = require 'atbar'
+
+exports.log = (path, msg) -> atbar.run 'trace', ->
+	fd = null; msg = (''+new Date)[0...24] + '  ' + msg + '\n'
+	@_ -> '_.log'; fs.open path, 'a', @$()
+	@_ (_throw, d) -> fd = d; fs.write fd, msg, null, null, @$()
+	@_ (_throw) -> fs.close fd
+	@_ 'catch', (err) -> console.log 'underscore.inspector.log err: ' + err
+	
 
